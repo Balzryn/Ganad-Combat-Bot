@@ -135,11 +135,11 @@ def run_ganbot(client, persistent):
         magic = await await_nonnegative_int(message)
         # Speed
         await client.send_message(message.channel,
-                                  "How fast are they? (Integer)")
+                                  "What is their speed? (Integer)")
         speed = await await_nonnegative_int(message)
         # Wisdom
         await client.send_message(message.channel,
-                                  "How wise are they? (Integer)")
+                                  "What is their wisdom? (Integer)")
         wisdom = await await_nonnegative_int(message)
         # Health
         await client.send_message(message.channel,
