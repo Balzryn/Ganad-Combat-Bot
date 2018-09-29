@@ -112,6 +112,7 @@ class TestRun_ganbot(TestCase):
 
         async def runCoroutine(client):
 
+            # A spec for what we want to achieve.
             name = 'Alisson'
 
             skills = {
@@ -123,24 +124,29 @@ class TestRun_ganbot(TestCase):
                 'wisdom': 20
             }
 
+            # Start the process
             client.test_message("--create_character", channel_1)
-
             self.assertIn('call them', await client.wait_for_bot_message(channel_1))
 
+            # Name the character
             client.test_message(name, channel_1)
 
+            # Start listing out skills.
             last_msg = await client.wait_for_bot_message(channel_1)
 
-            print('Skills.')
-
+            # Keep looping until the bot gives the character creation confirmation
             while 'hello to' not in last_msg:
 
+                # Use keywords to try to figure out which skill it's asking for.
                 found = False
 
                 for key, val in skills.items():
 
-                    # print('{} in "{}"'.format(key, last_msg))
+                    # Bot should not react to random chatter from Bob.
+                    client.test_message("594", channel_1, user=user_bob)
+
                     if key in last_msg:
+                        # Send the skill as an int
                         client.test_message(str(val), channel_1)
 
                         last_msg = await client.wait_for_bot_message(channel_1)
@@ -150,18 +156,17 @@ class TestRun_ganbot(TestCase):
                 if not found:
                     self.fail('Bot asked for unknown skill. Known skills are {}'.format(skills.keys()))
 
-
-
+            # Character creation is done,
             print('Done. Checking creation.')
 
+            # List the user's characters
             chars = test_peristent.getCharactersForUser(user_alice.id)
-
             filtered = [c for c in chars if c.name == name]
-
             self.assertNotEquals(filtered, [])
 
             resultingChar = filtered[0]
 
+            # Check all skills for correct stats.
             for skill, skillStat in skills.items():
                 self.assertEquals(getattr(resultingChar, skill), skillStat)
 
