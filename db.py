@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 
+from difflib import SequenceMatcher
 
 def mkEngine():
     eng = create_engine('sqlite:///ganbot.db', echo=True)
@@ -107,18 +108,18 @@ distance_table = Table('battle_distances', Base.metadata,
 
 
 def openPeristent():
-    return PeristentGanbot(mkEngine())
+    return PersistentGanbot(mkEngine())
 
 
 def openTestPeristent():
-    return PeristentGanbot(mkTestEngine())
+    return PersistentGanbot(mkTestEngine())
 
 
 class DuplicateCharacterError(Exception):
     pass
 
 
-class PeristentGanbot():
+class PersistentGanbot():
     '''
     Class representing an abstract interface to persistent storage.
     To SQLite, usually, but the caller is oblivious to this.
@@ -151,8 +152,24 @@ class PeristentGanbot():
 
             raise ie
 
-    def getCharactersForUser(self, userId):
+    def fetch_characters_for_user(self, userId):
         return self.getSession().query(Character).filter_by(player=userId).all()
+
+    def fetch_character_by_name(self, charName):
+        return self.getSession().query(Character).filter_by(name=charName).one_or_none()
+
+    def fetch_all_characters_by_name_like(self, pattern):
+        return self.getSession().query(Character).filter(Character.name.like(pattern)).all()
+
+    def search_character(self, queryName):
+
+        chars = self.getSession().query(Character).all()
+
+        def fuzzy_match(char: Character):
+            return SequenceMatcher(None, char.name, queryName).ratio()
+
+
+        return sorted(chars, key=fuzzy_match, reverse=True)
 
     def storeBattle(self, battle: Battle):
         self.__storeObject(battle)

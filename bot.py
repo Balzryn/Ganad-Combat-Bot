@@ -104,7 +104,7 @@ def run_ganbot(client, persistent):
             raise ex
 
     async def list_characters(message):
-        characters = persistent.getCharactersForUser(message.author.id)
+        characters = persistent.fetch_characters_for_user(message.author.id)
 
         if characters:
             msg = 'Off the top of my head, I remember you had these characters:\n' + \

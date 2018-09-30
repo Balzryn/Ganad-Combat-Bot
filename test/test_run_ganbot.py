@@ -7,14 +7,9 @@ import asyncio
 import asyncio.queues as aqueue
 import itertools
 from timeout_decorator import timeout
+import test.dummy_data as dd
 
-idGen = itertools.count()
-
-user_alice = discord.User(id=next(idGen))
-user_bob = discord.User(id=next(idGen))
-server = discord.Server(id=next(idGen))
-channel_1 = discord.Channel(id=next(idGen), server=server)
-
+channel_1 = dd.channel_1
 
 class TestClient():
     def __init__(self, test_routine):
@@ -49,9 +44,9 @@ class TestClient():
 
 
 
-    def test_message(self, content, channel, user=user_alice):
+    def test_message(self, content, channel, user=dd.user_alice):
 
-        print('Sent mock message: "{}" in channel {} as user {}'.format(content, channel_1.id, user.id))
+        print('Sent mock message: "{}" in channel {} as user {}'.format(content, dd.channel_1.id, user.id))
 
         message = discord.Message(content=content,
                                   author={'id': user.id},
@@ -143,7 +138,7 @@ class TestRun_ganbot(TestCase):
                 for key, val in skills.items():
 
                     # Bot should not react to random chatter from Bob.
-                    client.test_message("594", channel_1, user=user_bob)
+                    client.test_message("594", channel_1, user=dd.user_bob)
 
                     if key in last_msg:
                         # Send the skill as an int
@@ -160,7 +155,7 @@ class TestRun_ganbot(TestCase):
             print('Done. Checking creation.')
 
             # List the user's characters
-            chars = test_peristent.getCharactersForUser(user_alice.id)
+            chars = test_peristent.fetch_characters_for_user(dd.user_alice.id)
             filtered = [c for c in chars if c.name == name]
             self.assertNotEquals(filtered, [])
 
